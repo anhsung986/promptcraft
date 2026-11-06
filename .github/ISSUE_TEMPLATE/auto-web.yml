@@ -1,45 +1,45 @@
-name: 🚀 PromptCraft AI Web Builder
+name: PromptCraft AI Web Builder
 description: Điền thông tin để hệ thống tự động tạo web và xuất bản link.
 title: "[WEB]: "
 body:
   - type: input
     id: target
     attributes:
-      label: 1. Cho ai (Target User)
+      label: "1. Cho ai (Target User)"
       description: Đối tượng nhận trang web
-      placeholder: VD: Người yêu / Bạn thân...
+      placeholder: "VD: Người yêu / Bạn thân..."
     validations:
       required: true
   - type: input
     id: project_name
     attributes:
-      label: 2. Tên dự án (Project Name)
+      label: "2. Tên dự án (Project Name)"
       description: Tiêu đề trang web
-      placeholder: VD: Kỷ Niệm Yêu Thương...
+      placeholder: "VD: Kỷ Niệm Yêu Thương..."
     validations:
       required: true
   - type: input
     id: event_date
     attributes:
-      label: 3. Sự kiện / Ngày
+      label: "3. Sự kiện / Ngày"
       description: Mốc thời gian kỷ niệm
-      placeholder: VD: 14/02/2027...
+      placeholder: "VD: 14/02/2027..."
     validations:
       required: true
   - type: input
     id: color_theme
     attributes:
-      label: 4. Tông màu chủ đạo
+      label: "4. Tông màu chủ đạo"
       description: Phối màu trang web
-      placeholder: VD: Neon Cyan & Pink trên nền tối...
+      placeholder: "VD: Neon Cyan & Pink tràn màn hình..."
     validations:
       required: true
   - type: input
     id: filename
     attributes:
-      label: 5. Tên file lưu (TUYỆT ĐỐI KHÔNG DÙNG index.html)
-      description: Tên file kết thúc bằng .html
-      placeholder: VD: ky-niem-yeu.html
+      label: "5. Tên file lưu (TUYỆT ĐỐI KHÔNG DÙNG index.html)"
+      description: Tên tệp HTML khi lưu lên repo
+      placeholder: "VD: love.html"
     validations:
       required: true
       
