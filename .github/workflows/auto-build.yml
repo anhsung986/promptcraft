@@ -28,28 +28,33 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          python - << 'EOF'
-          import os, re
+          python3 -c '
+          import os, re, sys
           from google import genai
 
-          body = os.environ.get('ISSUE_BODY', '')
+          api_key = os.environ.get("GEMINI_API_KEY")
+          if not api_key:
+              print("LỖI: Chưa tìm thấy GEMINI_API_KEY trong Secrets!")
+              sys.exit(1)
+
+          body = os.environ.get("ISSUE_BODY", "")
           
           def extract_field(label, text):
-              match = re.search(rf'### {label}\s*\r?\n\s*([^\r\n]+)', text)
-              return match.group(1).strip() if match else ''
+              match = re.search(rf"### {label}\s*\r?\n\s*([^\r\n]+)", text)
+              return match.group(1).strip() if match else ""
 
-          target = extract_field('1. Cho ai \(Target User\)', body)
-          project_name = extract_field('2. Tên dự án \(Project Name\)', body)
-          event_date = extract_field('3. Sự kiện / Ngày', body)
-          color_theme = extract_field('4. Tông màu chủ đạo', body)
-          filename = extract_field('5. Tên file lưu \(TUYỆT ĐỐI KHÔNG DÙNG index.html\)', body)
+          target = extract_field("1. Cho ai \(Target User\)", body)
+          project_name = extract_field("2. Tên dự án \(Project Name\)", body)
+          event_date = extract_field("3. Sự kiện / Ngày", body)
+          color_theme = extract_field("4. Tông màu chủ đạo", body)
+          filename = extract_field("5. Tên file lưu \(TUYỆT ĐỐI KHÔNG DÙNG index.html\)", body)
 
-          if not filename or filename.lower() == 'index.html':
-              filename = 'generated-web.html'
-          if not filename.endswith('.html'):
-              filename += '.html'
+          if not filename or filename.lower() == "index.html":
+              filename = "generated-web.html"
+          if not filename.endswith(".html"):
+              filename += ".html"
 
-          client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
+          client = genai.Client(api_key=api_key)
           prompt = f"""
           Hãy tạo 01 file HTML độc lập hoàn chỉnh chứa 20+ tính năng nâng cao (Glassmorphism, Neon, Audio, Countdown, Pháo hoa, v.v.).
           Thông tin chi tiết:
@@ -62,18 +67,18 @@ jobs:
           """
           
           response = client.models.generate_content(
-              model='gemini-2.5-flash',
+              model="gemini-2.0-flash",
               contents=prompt
           )
           
-          html_code = response.text.replace('```html', '').replace('```', '').strip()
+          html_code = response.text.replace("```html", "").replace("```", "").strip()
 
-          with open(filename, 'w', encoding='utf-8') as f:
+          with open(filename, "w", encoding="utf-8") as f:
               f.write(html_code)
 
-          with open('filename.txt', 'w') as f:
+          with open("filename.txt", "w") as f:
               f.write(filename)
-          EOF
+          '
 
       - name: Commit and Push Code to GitHub
         run: |
