@@ -1,0 +1,108 @@
+name: Auto Build PromptCraft
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Google GenAI SDK
+        run: pip install google-genai
+
+      - name: Run AI Generator Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python -c "
+          import os, re
+          from google import genai
+
+          body = os.environ.get('ISSUE_BODY', '')
+          
+          def extract_field(label, text):
+              match = re.search(rf'### {label}\s*\r?\n\s*([^\r\n]+)', text)
+              return match.group(1).strip() if match else ''
+
+          target = extract_field('1. Cho ai \\(Target User\\)', body)
+          project_name = extract_field('2. Tên dự án \\(Project Name\\)', body)
+          event_date = extract_field('3. Sự kiện / Ngày', body)
+          color_theme = extract_field('4. Tông màu chủ đạo', body)
+          filename = extract_field('5. Tên file lưu .*', body)
+
+          if not filename or filename.lower() == 'index.html':
+              filename = 'generated-web.html'
+          if not filename.endswith('.html'):
+              filename += '.html'
+
+          client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
+          prompt = f'''
+          Hãy tạo 01 file HTML độc lập hoàn chỉnh chứa 20+ tính năng nâng cao (Glassmorphism, Neon, Audio, Countdown, Pháo hoa, v.v.).
+          Thông tin chi tiết:
+          - Dành cho: {target}
+          - Tên dự án: {project_name}
+          - Sự kiện: {event_date}
+          - Tông màu: {color_theme}
+          
+          YÊU CẦU: Chỉ trả về mã code HTML thô, tuyệt đối không bao bọc bởi ```html hay giải thích nào khác.
+          '''
+          
+          response = client.models.generate_content(
+              model='gemini-2.5-flash',
+              contents=prompt
+          )
+          
+          html_code = response.text.replace('```html', '').replace('```', '').strip()
+
+          with open(filename, 'w', encoding='utf-8') as f:
+              f.write(html_code)
+
+          with open('filename.txt', 'w') as f:
+              f.write(filename)
+          "
+
+      - name: Commit and Push Code to GitHub
+        run: |
+          FILENAME=$(cat filename.txt)
+          git config --global user.name "PromptCraft Bot"
+          git config --global user.email "bot@github.com"
+          git add "$FILENAME"
+          git commit -m "Auto-generated website: $FILENAME"
+          git push origin main
+
+      - name: Reply Live Link in Issue Comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const filename = fs.readFileSync('filename.txt', 'utf8').trim();
+            const liveUrl = `[https://www.prompt.totalh.net/0/$](https://www.prompt.totalh.net/0/$){filename}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🎉 **Trang web của bạn đã được PromptCraft khởi tạo thành công!**\n\n👉 **Đường link xem trực tiếp:** [${liveUrl}](${liveUrl})`
+            });
+            
+            github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            });
+            
