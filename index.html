@@ -30,30 +30,30 @@
     <h1><i class="fa-solid fa-wand-magic-sparkles"></i> PromptCraft</h1>
     <p class="subtitle">Hệ thống khởi tạo Website tự động 100% bằng AI</p>
 
-    <form id="buildForm" action="https://github.com/anhsung986/promptcraft/issues/new" method="GET" target="_blank">
+    <form id="buildForm" onsubmit="submitToGithub(event)">
         <div class="input-group">
             <label><i class="fa-solid fa-user"></i> 1. Dành cho ai</label>
-            <input type="text" name="title" placeholder="VD: Người Yêu / Bạn Thân / Mẹ..." required>
+            <input type="text" id="target" placeholder="VD: LY THỊ CHẤU / Bạn Thân..." required>
         </div>
 
         <div class="input-group">
             <label><i class="fa-solid fa-heading"></i> 2. Tên dự án / Tiêu đề</label>
-            <input type="text" placeholder="VD: Kỷ Niệm Tình Yêu" required>
+            <input type="text" id="project_name" placeholder="VD: Kỷ Niệm Tình Yêu" required>
         </div>
 
         <div class="input-group">
             <label><i class="fa-solid fa-calendar-days"></i> 3. Mốc thời gian kỷ niệm</label>
-            <input type="text" placeholder="VD: 14/02/2027" required>
+            <input type="text" id="event_date" placeholder="VD: 14/02/2027" required>
         </div>
 
         <div class="input-group">
             <label><i class="fa-solid fa-palette"></i> 4. Phối màu chủ đạo</label>
-            <input type="text" placeholder="VD: Neon Hồng Pastel & Xanh Mint" required>
+            <input type="text" id="color_theme" placeholder="VD: Neon Hồng Pastel & Xanh Mint" required>
         </div>
 
         <div class="input-group">
             <label><i class="fa-solid fa-file-code"></i> 5. Tên file lưu (Không dùng index.html)</label>
-            <input type="text" placeholder="VD: ky-niem.html" required>
+            <input type="text" id="filename" placeholder="VD: ky-niem-chau.html" required>
         </div>
 
         <button type="submit" class="btn-submit">
@@ -65,6 +65,37 @@
         Powered by <a href="https://github.com/anhsung986/promptcraft" target="_blank">PromptCraft Engine</a> & GitHub Actions
     </div>
 </div>
+
+<script>
+function submitToGithub(e) {
+    e.preventDefault();
+
+    const target = document.getElementById('target').value;
+    const projectName = document.getElementById('project_name').value;
+    const eventDate = document.getElementById('event_date').value;
+    const colorTheme = document.getElementById('color_theme').value;
+    let filename = document.getElementById('filename').value.trim();
+
+    if (filename.toLowerCase() === 'index.html') {
+        filename = 'main-app.html';
+    }
+    if (!filename.endsWith('.html')) {
+        filename += '.html';
+    }
+
+    const title = encodeURIComponent(`[WEB]: ${projectName}`);
+    
+    // Tự động đóng gói nội dung theo chuẩn Markdown mà Bot GitHub Actions chờ sẵn
+    const bodyText = `### 1. Cho ai (Target User)\n${target}\n\n### 2. Tên dự án (Project Name)\n${projectName}\n\n### 3. Sự kiện / Ngày\n${eventDate}\n\n### 4. Tông màu chủ đạo\n${colorTheme}\n\n### 5. Tên file lưu (TUYỆT ĐỐI KHÔNG DÙNG index.html)\n${filename}`;
+    
+    const body = encodeURIComponent(bodyText);
+
+    // Chuyển hướng chính xác sang GitHub với dữ liệu đã điền sẵn
+    const githubUrl = `https://github.com/anhsung986/promptcraft/issues/new?title=${title}&body=${body}`;
+    
+    window.open(githubUrl, '_blank');
+}
+</script>
 
 </body>
 </html>
