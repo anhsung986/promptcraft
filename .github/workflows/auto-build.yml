@@ -66,8 +66,9 @@ jobs:
           YÊU CẦU: Chỉ trả về mã code HTML thô, tuyệt đối không bao bọc bởi ```html hay giải thích nào khác.
           """
           
+          # Sử dụng tên chuẩn chung nhất để tương thích mọi phiên bản API
           response = client.models.generate_content(
-              model="gemini-3.0-flash",
+              model="gemini-2.0-flash",
               contents=prompt
           )
           
