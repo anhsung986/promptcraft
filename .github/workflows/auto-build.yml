@@ -28,7 +28,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          python -c "
+          python - << 'EOF'
           import os, re
           from google import genai
 
@@ -38,11 +38,11 @@ jobs:
               match = re.search(rf'### {label}\s*\r?\n\s*([^\r\n]+)', text)
               return match.group(1).strip() if match else ''
 
-          target = extract_field('1. Cho ai \\(Target User\\)', body)
-          project_name = extract_field('2. Tên dự án \\(Project Name\\)', body)
+          target = extract_field('1. Cho ai \(Target User\)', body)
+          project_name = extract_field('2. Tên dự án \(Project Name\)', body)
           event_date = extract_field('3. Sự kiện / Ngày', body)
           color_theme = extract_field('4. Tông màu chủ đạo', body)
-          filename = extract_field('5. Tên file lưu .*', body)
+          filename = extract_field('5. Tên file lưu \(TUYỆT ĐỐI KHÔNG DÙNG index.html\)', body)
 
           if not filename or filename.lower() == 'index.html':
               filename = 'generated-web.html'
@@ -50,7 +50,7 @@ jobs:
               filename += '.html'
 
           client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
-          prompt = f'''
+          prompt = f"""
           Hãy tạo 01 file HTML độc lập hoàn chỉnh chứa 20+ tính năng nâng cao (Glassmorphism, Neon, Audio, Countdown, Pháo hoa, v.v.).
           Thông tin chi tiết:
           - Dành cho: {target}
@@ -59,7 +59,7 @@ jobs:
           - Tông màu: {color_theme}
           
           YÊU CẦU: Chỉ trả về mã code HTML thô, tuyệt đối không bao bọc bởi ```html hay giải thích nào khác.
-          '''
+          """
           
           response = client.models.generate_content(
               model='gemini-2.5-flash',
@@ -73,7 +73,7 @@ jobs:
 
           with open('filename.txt', 'w') as f:
               f.write(filename)
-          "
+          EOF
 
       - name: Commit and Push Code to GitHub
         run: |
